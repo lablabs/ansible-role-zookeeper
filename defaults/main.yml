@@ -1,0 +1,27 @@
+---
+zookeeper_base_dir: /opt
+zookeeper_data_root_dir: /data/zookeeper
+zookeeper_data_dir: "{{ zookeeper_data_root_dir }}/data"
+zookeeper_log_dir: /data/zookeeper/log
+zookeeper_log_index_dir: /data/zookeeper/log-index
+zookeeper_log4j_properties_path: "{{ zookeeper_base_dir }}/zookeeper/conf/log4j.properties"
+zookeeper_version: 3.4.14
+
+zookeeper_required_apt_packages:
+  - openjdk-8-jdk-headless
+
+zookeeper_archive_name: "zookeeper-{{ zookeeper_version }}"
+zookeeper_tar: "{{ zookeeper_archive_name }}.tar.gz"
+zookeeper_download_url: "{{ zookeeper_download_mirror }}-{{ zookeeper_version }}/{{ zookeeper_tar }}"
+zookeeper_tar_dest: "/tmp/{{ zookeeper_tar }}"
+
+zookeeper_unix_user: zookeeper
+zookeeper_unix_group: zookeeper
+
+zookeeper_log4j_rootlogger: "INFO, ROLLINGFILE"
+zookeeper_log4j_rollingfile_threshold: "INFO"
+zookeeper_log4j_log_dir: "/var/log/zookeeper"
+zookeeper_log4j_rollingfile_file: "{{ zookeeper_log4j_log_dir }}/zookeeper.log"
+zookeeper_log4j_rollingfile_maxfilesize: "50MB"
+zookeeper_log4j_rollingfile_maxbackupindex: "10"
+...

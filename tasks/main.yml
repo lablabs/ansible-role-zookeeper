@@ -1,0 +1,93 @@
+---
+- name: install required apt packages
+  apt:
+    name: "{{ zookeeper_required_apt_packages }}"
+    state: present
+    update_cache: yes
+  tags:
+    - zookeeper
+
+- name: "create {{ zookeeper_unix_user }} user"
+  user:
+    name: "{{ zookeeper_unix_user }}"
+    state: present
+  tags:
+    - zookeeper
+
+- name: "create {{ zookeeper_unix_group }} user"
+  group:
+    name: "{{ zookeeper_unix_group }}"
+    state: present
+  tags:
+    - zookeeper
+
+- name: "create zookeeper directories owned by {{ zookeeper_unix_user }}"
+  file:
+    state: directory
+    path: "{{ item }}"
+    owner: "{{ zookeeper_unix_user }}"
+    group: "{{ zookeeper_unix_group }}"
+    mode: 0775
+  loop:
+    - "{{ zookeeper_data_root_dir }}"
+    - "{{ zookeeper_base_dir }}"
+    - "{{ zookeeper_data_dir }}"
+    - "{{ zookeeper_log_dir }}"
+    - "{{ zookeeper_log_index_dir }}"
+  tags:
+    - zookeeper
+
+- name: download zookeeper
+  get_url:
+    url: "{{ zookeeper_download_url }}"
+    dest: "{{ zookeeper_tar_dest }}"
+  tags:
+    - zookeeper
+
+- name: "unzip zookeeper in {{ zookeeper_base_dir }}"
+  unarchive:
+    src: "{{ zookeeper_tar_dest }}"
+    dest: "{{ zookeeper_base_dir }}"
+    owner: "{{ zookeeper_unix_user }}"
+    group: "{{ zookeeper_unix_group }}"
+    remote_src: yes
+  tags:
+    - zookeeper
+
+- name: "create zookeeper {{ zookeeper_base_dir }}/zookeeper symlink"
+  file:
+    src: "{{ zookeeper_base_dir }}/{{ zookeeper_archive_name }}"
+    dest: "{{ zookeeper_base_dir }}/zookeeper"
+    state: link
+  tags:
+    - zookeeper
+
+- name: "deploy log4j.properties"
+  template:
+    src: "templates/log4j.properties.j2"
+    dest: "{{ zookeeper_log4j_properties_path }}"
+    owner: "{{ zookeeper_unix_user }}"
+    group: "{{ zookeeper_unix_group }}"
+    mode: 0755
+  tags:
+    - zookeeper
+
+- name: "create {{ zookeeper_log4j_log_dir }} dir for zookeeper service logs"
+  file:
+    state: directory
+    path: "{{ zookeeper_log4j_log_dir }}"
+    owner: "{{ zookeeper_unix_user }}"
+    group: "{{ zookeeper_unix_group }}"
+    mode: 0775
+
+- name: "ensure the correct owner on zookeeper dirs"
+  file:
+    state: directory
+    path: "{{ item }}"
+    owner: "{{ zookeeper_unix_user }}"
+    group: "{{ zookeeper_unix_group }}"
+    recurse: "yes"
+  loop:
+    - "{{ zookeeper_data_root_dir }}"
+    - "{{ zookeeper_base_dir }}/zookeeper"
+...
